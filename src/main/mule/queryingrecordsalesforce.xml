@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2a2ea261-736b-4a80-9b0a-817bd741428c" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="8b531fba-9a36-442a-9571-f2176b5eef27" >
+		<salesforce:basic-connection username="lenziemaraang@gmail.com" password="Qwertyuiop1!" securityToken="AXu0Pf7iX7qVtLeWI1VwoQEE" />
+	</salesforce:sfdc-config>
+	<flow name="queryingrecordsalesforceFlow" doc:id="8b4bdddc-5e68-4326-abe2-74c9d7855aed" >
+		<http:listener doc:name="Listener" doc:id="1304301a-3db3-41a0-b46e-f0cf1ff2aeb3" config-ref="HTTP_Listener_config" path="/queryRecords" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.billingCity default '']" doc:name="Set Variable" doc:id="328d7061-1c63-48f0-abe1-70da78102846" variableName="billingCityVar"/>
+		<choice doc:name="Choice" doc:id="0c9780e1-1e02-45cc-b7ff-e69e632f7527" >
+			<when expression="#[vars.billingCityVar != '']">
+				<salesforce:query-all doc:name="Query all" doc:id="59383bff-9a6f-44dd-8ba0-aa2ee88fff5c" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query ><![CDATA[select name, billingCountry, billingAddress, billingCity, billingPostalCode from Account where billingCity=':billingCity']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	billingCity : vars.billingCityVar
+}]]]></salesforce:parameters>
+				</salesforce:query-all>
+			</when>
+			<otherwise >
+				<salesforce:query-all doc:name="Query all" doc:id="ad779336-6af5-4edd-b6e9-2a041c814daa" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[select name, billingCountry, billingAddress, billingCity, billingPostalCode from Account]]></salesforce:salesforce-query>
+		</salesforce:query-all>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="eef54924-0061-493b-9fb8-e29174375391" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="queryingrecordsalesforceFlow1" doc:id="acb4c372-b713-459b-a2cc-9785b0eb3bf3" >
+		<http:listener doc:name="Listener" doc:id="6cb56df0-827d-411d-8e66-60c5c432c4bd" config-ref="HTTP_Listener_config" path="/queryAct2" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.billingState default '']" doc:name="Set Variable" doc:id="5bbf62b4-95e5-4831-9c80-0ec45d420ef3" variableName="billingStateVar"/>
+		<choice doc:name="Choice" doc:id="166531cb-c53d-47f4-bd8f-e3dec867e1e0" >
+			<when expression="#[vars.billingStateVar == 'TX']">
+				<salesforce:query-all doc:name="Query all" doc:id="3aef94eb-a436-43a2-b994-d49bd00afe3a" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query ><![CDATA[select name, billingAddress, billingPostalCode,billingCity,billingcountry, billingState from Account where billingState = ':billingStateVar']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	billingStateVar : vars.billingStateVar
+}]]]></salesforce:parameters>
+				</salesforce:query-all>
+			</when>
+			<when expression="#[vars.billingStateVar == 'KS']">
+				<salesforce:query-all doc:name="Query all" doc:id="02600d9e-65a9-46d4-86e6-be6a8ecba6d4" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query ><![CDATA[select name, billingAddress, billingPostalCode,billingCity,billingcountry, billingState from Account where billingState = ':billingStateVar']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	billingStateVar : vars.billingStateVar
+}]]]></salesforce:parameters>
+				</salesforce:query-all>
+			</when>
+			<when expression="#[vars.billingStateVar == 'OR']">
+				<salesforce:query-all doc:name="Query all" doc:id="1e450259-5529-449a-8637-07c9c8d01a2d" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query ><![CDATA[select name, billingAddress, billingPostalCode,billingCity,billingcountry, billingState from Account where billingState = ':billingStateVar']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	billingStateVar : vars.billingStateVar
+}]]]></salesforce:parameters>
+				</salesforce:query-all>
+			</when>
+			<otherwise >
+				<salesforce:query-all doc:name="Query all" doc:id="9f86f659-d410-4e3d-9c5a-3ffb9192cf68" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query ><![CDATA[select name, billingAddress, billingPostalCode,billingCity,billingcountry, billingState from Account]]></salesforce:salesforce-query>
+				</salesforce:query-all>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="0cd60592-01ac-43f2-998a-a63566f14574" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
